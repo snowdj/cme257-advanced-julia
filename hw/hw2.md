@@ -1,11 +1,13 @@
 # CME 257 Homework 2
-Due 10/4 at 5pm
+Due Sunday 1/21 at 12 noon.
 
-Please submit the assignment in a IJulia notebook (.ipynb), and put the type and function definitions in a module.  If you do not have IJulia notebooks running on your personal computer yet, you can use [juliabox.org](https://juliabox.org) to create one, and download it to you computer (you need to figure out how to upload the module).  If you do this, please use the Julia 0.4-rc2 kernel (you can change the kernel in the drop-down kernel menu).
+Please submit the assignment in a IJulia notebook (.ipynb), and put the type and function definitions in a module.  Please use a Julia v0.6.2 kernel (you can change the kernel in the drop-down kernel menu).
 
 Name your ipynb "lastname_hw2.ipynb" and the module "lastname_hw2.jl".  The .ipynb should include the module assuming the module is in the same folder.
 
 Email your .ipynb and module to bjnelson@stanford.edu with subject "cme 257 hw 2 submission"
+
+The first 4 parts should be fairly straightforward based on the material covered in the second class.  Part 5 is a bonus question, meaning you should only do it if you find it interesting.  
 
 ---
 
@@ -15,12 +17,12 @@ A matrix encodes a linear transformation between vector spaces.  In scientific c
 
 ---
 
-* (Exercise 1) create an abstract cme257matrix type.
-* (Exercise 2) Here is some code to define a cme257rank1 type, and vector multiplication:
+* (Part 1) create an abstract cme257matrix type.
+* (Part 2) Here is some code to define a cme257rank1 type, and vector multiplication:
 
 ```julia
 
-type cme257rank1{T} <: cme257matrix
+struct cme257rank1{T} <: cme257matrix
     ## a rank-1 matrix type
     # A = u*v'
     # m is size of matrix
@@ -49,18 +51,18 @@ randn(10) # generates a random vector of length n
 ones(10) # generates a vector of all ones of length n
 ~~~
 
-* (Exercise 3) create a cme257diagonal type, which behaves like a diagonal matrix:
+* (Part 3) create a cme257diagonal type, which behaves like a diagonal matrix:
   1. it should be parameterized by T
   2. it should be a child of cme257matrix
   3. it should have two fields: "d" which is a m x 1 array of entries on the diagonal, and "m" which is the size of the matrix.
   4. create a special constructor for cme257diagonal which only takes a vector (m x 1 array), and infers m from its length.
-  5. Add a method to the " \* " function which allows you to multiply a vector (m x 1 array) with a cme257diagonal matrix.  remember to check that the size matches! (hint: " .* " behaves like it does in MATLAB)
+  5. Add a method to the ```* ``` function which allows you to multiply a vector (m x 1 array) with a cme257diagonal matrix.  remember to check that the size matches! (hint: " .* " behaves like it does in MATLAB)
 
   verify that your special constructor and matrix multiplication work as expected.
 
-  You essentially just implemented Julia's native Diagonal type.  Look at the first few lines of code [here](https://github.com/JuliaLang/julia/blob/master/base/linalg/diagonal.jl).
+  (Aside) You essentially just implemented Julia's native Diagonal type.  Look at the first few lines of code [here](https://github.com/JuliaLang/julia/blob/master/base/linalg/diagonal.jl). Julia has several [special matrix types](https://docs.julialang.org/en/latest/manual/linear-algebra/#Special-matrices-1), which you can use for better storage and better performance if your application allows.
 
-* (Exercise 4) Now, we're going to create a plot that compares how fast multiplication is with a regular matrix versus one of our special matrices.
+* (Part 4) Now, we're going to create a plot that compares how fast multiplication is with a regular matrix versus one of our special matrices.
   1. Choose one of cme257diagonal or cme257rank1
   2.  Use PyPlot (or another plotting package) to plot the time it takes to complete multiplication for m in [10, 50, 100, 500, 1000] for both cme257diagonal and a full matrix.
 
@@ -78,7 +80,7 @@ ones(10) # generates a vector of all ones of length n
   t = toq() # saves the time to do something
   ```
 
-* (Exercise 5) Finding the top [eigenvector](https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors) of a matrix (by top eigenvector, I mean the eigenvector with largest magnitude eigenvalue).  One method of computing the top eigenvector of a matrix is the [power iteration](https://en.wikipedia.org/wiki/Power_iteration).  A version of the power iteration is written in pseudocode below
+* [bonus] (Part 5) Finding the top [eigenvector](https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors) of a matrix (by top eigenvector, I mean the eigenvector with largest magnitude eigenvalue).  One method of computing the top eigenvector of a matrix is the [power iteration](https://en.wikipedia.org/wiki/Power_iteration).  A version of the power iteration is written in pseudocode below
 
 ```
 Input:
@@ -96,7 +98,7 @@ end while
 return v
 ```
 
-write a single function that takes either of the cme257matrix children as input and uses the power iteration to compute the top eigenvector.  Test it on 10 x 10 matrices.
+write a single function that takes either of the cme257matrix children as input and uses the power iteration to compute the top eigenvector.  To avoid some issues, just stick to symmetric matrices. Test it on 10 x 10 matrices.
 
 for the v != vprev check, try using
 
