@@ -5,30 +5,36 @@
 If you don't have a mac or linux computer, it may be easiest to ssh into farmshare to follow along.
 
 ## Getting started
+You may already be familiar with Git already from other classes or from research. You may have also used it to install Julia back at the start of the course.
 
-We've already used git to download the latest version of Julia on our computers.  Here's a recap of how you do this
-
-```bash
-git clone git@github.com:JuliaLang/julia.git
-```
-
-and maybe
-
-```bash
-cd julia
-git checkout v0.6.2
-```
-
-We've also seen Julia's package manager is doing something under the hood, when we do something like
+We've also seen that Julia's package manager is doing something with git under the hood, when we do something like
 ```julia
-Pkg.clone("git@github.com:JuliaSparse/Metis.jl.git")
+julia> Pkg.clone("Flux")
+┌ Warning: Pkg.clone is only kept for legacy CI script reasons, please use `add`
+└ @ Pkg.API /Users/sabae/buildbot/worker/package_macos64/build/usr/share/julia/stdlib/v1.2/Pkg/src/API.jl:406
+   Cloning git-repo `https://github.com/FluxML/Flux.jl.git`
+  Updating git-repo `https://github.com/FluxML/Flux.jl.git`
+ Resolving package versions...
+ Installed ZygoteRules ─ v0.1.0
+ Installed IRTools ───── v0.2.3
+ Installed Zygote ────── v0.3.4¸
+  Updating `~/.julia/environments/v1.2/Project.toml`
+  [587475ba] ~ Flux v0.9.0 ⇒ v0.9.0 [`~/.julia/dev/Flux`]
+  Updating `~/.julia/environments/v1.2/Manifest.toml`
+  [587475ba] ~ Flux v0.9.0 ⇒ v0.9.0 [`~/.julia/dev/Flux`]
+  [7869d1d1] + IRTools v0.2.3
+  [9f7883ad] - Tracker v0.2.3
+  [e88e6eb3] + Zygote v0.3.4
+  [700de1a5] + ZygoteRules v0.1.0
 ```
+
+(Ignore that `Pkg.clone()` is deprecated for this example)
 
 Today we'll talk a bit about what's going on here - version control using git.
 
 ## What is git?
 
-First, let's note that GitHub is not git (and git is not GitHub).  We use GitHub in this course because that is where Julia and its packages are stored.  GitHub is a host for remote git repositories, and there are other such hosts (for example bitbucket.org).  You can also set up your own remote repository on a private server, or even use git without a remote repository.  If you're a student, you can request an academic account on GitHub (use your Stanford email) to let you have private repositories for free.  This is nice for research, or other projects you're not quite ready to share with the world.
+First, let's note that GitHub is not git (and git is not GitHub).  We use GitHub in this course because that is where Julia and its packages are stored.  GitHub is a host for remote git repositories, and there are other such hosts (for example bitbucket.org or gitlab.com).  You can also set up your own remote repository on a private server, or even use git without a remote repository.  If you're a student, you can request an academic account on GitHub (use your Stanford email) to let you have private repositories for free.  This is nice for research, or other projects you're not quite ready to share with the world.
 
 What is git?  It is a version control system.  This enables:
 * periodic saving of work (called *committing*)
@@ -103,6 +109,10 @@ remove a file from the repository:
 ```bash
 git rm badfile.txt
 ```
+moving a file:
+```bash
+git mv moved.txt
+```
 
 commit changes:
 ```bash
@@ -135,7 +145,7 @@ So far the DAG we've made is not very interesting.  Here are some
 ```bash
 git branch # print out available branches
 git branch branch1 # creates a new branch 'branch1'
-git checkout branch1 # create content on branch1
+git checkout branch1 # create content on branch1: read checkout as "check out"
 git checkout master # create content on the master branch
 git checkout -b branch2 # create a new branch 'branch2', and check it out
 ```

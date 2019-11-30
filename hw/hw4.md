@@ -1,76 +1,81 @@
-# CME 257 HW 4 - Julia Sets
+# CME 257 Homework 4
+Due Sunday 11/10 at 11:59 pm.
 
-Due Sunday 2/18/18 by midnight.  Send an ipynb to bjnelson@stanford.edu.
+Please submit the assignment in a IJulia notebook (.ipynb). Name your ipynb "lastname_hw4.ipynb". This assignment shouldn't take you more than 90 minutes.
 
-## Julia Sets
+Email your .ipynb to jmblpati@stanford.edu with subject "cme 257 hw 4 submission"
 
-Consider a rational function in the complex plane R(z) = P(z)/Q(z) where P, Q are polynomials without common divisors.  Let S be the set of points z in the complex plane that do not approach infinity after having R repeatedly applied.  That is
+---
 
-R(R(...R(z)...))
+In this homework you'll implement a strange type of matrix multiplication in Julia, and use the techniques from lecture 5 to optimize your implementation. You will also make use of PyCall to call a Python package for doing graph theory, and finally use your strange matrix-vector product to compute distances in graphs.
 
-does not go to infinity. Julia sets are the boundary of S.
+This assignment shouldn't take you more than 90 minutes.
 
-[Wikipedia definition](https://en.wikipedia.org/wiki/Julia_set)
+---
 
-[Wolfram mathworld definition](http://mathworld.wolfram.com/JuliaSet.html)
+* (Part 1) We define the [*min-plus*](https://en.wikipedia.org/wiki/Min-plus_matrix_multiplication) on matrices as follows. Given two (n by n) matrices A and B, we want an output matrix C where C[i,j] = min<sub>k</sub> (A[i,k] + B[k,j]). In other words, to construct C[i,j] we take the i<sup>th</sup> row from A and the j<sup>th</sup> column from B, and find k to minimize A[i,k] + B[k,j]. Write a naive implementation of min-plus multiplication in Julia.
 
-[Julia Jewels](http://mcgoodwin.net/julia/juliajewels.html)
+* (Part 2) Using some of ^e tricks from Lecture 5, optimize your implementation of the min-plus product. Your code should use some of the vectorization macros, and you should experiment with pre-allocating memory. Keep in mind some of the things we discussed about the speed directly modifying the entries of an array versus using a local variable. Benchmark your implementations on random n by n integer matrices with n = 10,50,100,500,1000,2000. 
 
-Julia sets and the [Mandelbrot set](https://en.wikipedia.org/wiki/Mandelbrot_set) are closely related - the Mandelbrot set is the set of complex numbers c such that 0 does not diverge to infinity under the map z^2 + c.
-
-## Visualizing Julia Sets
-
-### Compute if points diverge
-
-In this assignment, you'll write a function to allow someone to visualize a Julia set.  We won't worry about finding points on the boundary of S, but the simpler problem of finding points that haven't diverged beyond some given size after some given number of iterations.
-
-You should write a function with the following properties:
-
-Input:
-* R - a rational function on the complex numbers (or just a function).
-* x - a 1-D array of grid points on the real line
-* y - a 1-D array of grid points on the imaginary line
-* n_iter - the maximum number of iterations on a point (set a reasonable default)
-* escape_tol - if the norm of a point goes beyond this tolerance, consider it gone to infinity (set a reasonable default)
-
-Output:
-* An array A of size(x) by size(y), where A[ i,j ] is the number of iterations it took z = x[ i ] + 1im * y[ j ] to surpass the escape_tol parameter in norm.  If the point did not escape, set A[ i,j ] to escape_tol + 1.
-
-Parameterize your function on a type T (T should be a Real type) that lets you change the precision of your computations.  (the reason: look at how [complex is defined](https://github.com/JuliaLang/julia/blob/master/base/complex.jl))
-
-### Performance
-
-Use some of the things we talked about in class 6 to make your function fast.  There are a couple ways to think about doing this - broadcasting, loop macros, etc.  Use the profiler if you're stuck.
-
-
-###  Visualize your results
-
-Once you have your function working, visualize the array that you produce.  Try to find some interesting examples.
-
-## Tips
-
-If you don't know where to get started with the function, here's some basic pseudo code that may or may not perform well:
-
+* (Part 3) Now, we will generate graph adjacency matrices using Python and PyCall. To make PyCall find packages installed in our system-wide python3 installation, we add to Julia's ENV list and rebuild Pycall. From the terminal, run the command
+```bash
+which python3
 ```
-A = zeros(length(x), length(y))
-for i in 1:length(x)
-  for j in 1:length(y)
-    z = x[i] + im * y[j]
-    for k in 1:n_iter
-      z = R(z)
-      if abs(z) > escape_tol # diverged
-        A[i,j] = k
-        break
-      end
-    end
-    if A[i,j] == 0 # didn't diverge
-      A[i,j] = n_iter + 1
-    end
-  end
+and take the output-- it should look like `/usr/local/bin/python3` or   `/usr/bin/python3` on Mac or Linux. Run the following code
+```julia
+using PyCall
+ENV["PYTHON"] = {Whatever string that you got fron the previous step}
+using Pkg
+Pkg.build("PyCall")
+```
+and then restart your Julia notebook's kernel.
+
+* (Part 4) Using NetworkX, Numpy, and Scipy through PyCall, we will write a function which generates a random graph and returns its adjacency matrix and diameter. Here is some starter code.
+```julia
+using PyCall
+nx = pyimport("networkx")
+np = pyimport("numpy")
+sp = pyimport("scipy.sparse")
+function generate_random_graph(n)
+    G = nx.gnm_random_graph(n,5*n)
+    return G
 end
-
+function adjacency_from_graph(G)
+    *your code here*
+end
 ```
+So far, the above code returns a random Erdos-Renyi random graph G with n vertices and 5n edges. Extend the function `adjacency_from_graph` to return the adjacency matrix of G represented as a dense matrix.
+(**Hint**: You may find the functions `nx.adjacency_matrix()` and `sp.csr_matrix.todense()` to be helpful.)
 
-## Acknowledgements
+* (Part 5) Now, we're going to use our special min-plus product routine to compute the diameter of random graphs. Here is some Julia code to compute the diameter of random graphs generated by the code in part 3:
+```julia 
+g = nx.gnm_random_graph(n,n)
+function python_diameter(g)
+    if nx.is_connected(g)
+        return(nx.diameter(g))
+    else
+        return(g.number_of_nodes()+1)
+    end
+end
+```
+If A is the standard adjacency matrix of an n node graph, let B be the matrix where every 0 entry in A that is not on the diagonal is replaced with n+1. Hence if A was
+```julia
 
-CME 196 - Practical Fortran, developed and taught by Anders Petersen, included a an assignment on visualizing the Mandelbrot set, which is what inspired this assignment.
+ 0  1  0  0  1
+ 1  0  1  0  1
+ 0  1  0  1  1
+ 0  0  1  0  0
+ 1  1  1  0  0
+ ```
+ , B is 
+ ```julia
+ 0  1  6  6  1
+ 1  0  1  6  1
+ 6  1  0  1  1
+ 6  6  1  0  6
+ 1  1  1  6  0
+```
+Write a function to turn a normal adjacency matrix into this "modified" adjacency matrix. It turns out that if G is an n-node graph with adjacency matrix A and modified adjacency matrix B, the diameter of G is precisely the maximum value in the n<sup>th</sup> power of B (or n+1 if G is not connected). In other words, if we take B, copy it to another matrix C, and multiply B by C n times using the min-plus product, we can compute the diameter of G! Implement this using your optimized min-plus product implementation, and compare its output with `python_diameter`.
+(**Note**: it is important to use the min plus product here! Using normal matrix multiplication will just cause B to go off to infinity.)
+
+* (Part 6 (Bonus)) It also turns out that the min-plus product is associative. Thus, we can compute the n<sup>th</sup> min-plus power by [repeated squaring](https://en.wikipedia.org/wiki/Exponentiation_by_squaring). Implement this in Julia, and compare its running time to the naive method in Part 5.
